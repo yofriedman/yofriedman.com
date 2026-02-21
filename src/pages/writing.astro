@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allWriting = await getCollection('writing', ({ data }) => data.published);
+const posts = allWriting.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+function formatDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+---
+
+<BaseLayout title="Writing">
+  <div class="page-header">
+    <h1>Writing</h1>
+    <p>Essays, articles, and longer pieces.</p>
+  </div>
+
+  {posts.map((post) => (
+    <div class="writing-entry">
+      <div class="writing-title">
+        <a href={post.data.url || `/writing/${post.id}`}>{post.data.title}</a>
+      </div>
+      <div class="writing-meta">{formatDate(post.data.date)}</div>
+      {post.data.description && <p class="writing-description">{post.data.description}</p>}
+    </div>
+  ))}
+</BaseLayout>

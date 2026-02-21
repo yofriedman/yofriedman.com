@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allChangelog = await getCollection('changelog');
+const latestChangelog = allChangelog
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 5);
+
+const allWriting = await getCollection('writing', ({ data }) => data.published);
+const latestWriting = allWriting
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+function formatDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+---
+
+<BaseLayout>
+  <div class="intro">
+    <h1>Josh Friedman</h1>
+    <p>
+      I build custom business systems — websites, dashboards, automations, data pipelines — using AI, in days instead of months. Marketing strategist turned builder. Based in Boston.
+    </p>
+  </div>
+
+  {latestChangelog.length > 0 && (
+    <section>
+      <div class="section-header">
+        <h2>Changelog</h2>
+        <a href="/changelog">View all &rarr;</a>
+      </div>
+      {latestChangelog.map(async (entry) => {
+        const { Content } = await entry.render();
+        return (
+          <div class="changelog-entry">
+            <div class="changelog-date">{formatDate(entry.data.date)}</div>
+            <div class="changelog-body"><Content /></div>
+            {entry.data.tags.length > 0 && (
+              <div class="changelog-tags">
+                {entry.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </section>
+  )}
+
+  {latestWriting.length > 0 && (
+    <section style="margin-top: var(--space-2xl);">
+      <div class="section-header">
+        <h2>Writing</h2>
+        <a href="/writing">View all &rarr;</a>
+      </div>
+      {latestWriting.map((post) => (
+        <div class="writing-entry">
+          <div class="writing-title">
+            <a href={post.data.url || `/writing/${post.id}`}>{post.data.title}</a>
+          </div>
+          <div class="writing-meta">{formatDate(post.data.date)}</div>
+          {post.data.description && <p class="writing-description">{post.data.description}</p>}
+        </div>
+      ))}
+    </section>
+  )}
+</BaseLayout>

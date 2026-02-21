@@ -1,0 +1,35 @@
+---
+const pathname = Astro.url.pathname;
+---
+
+<nav class="site-nav">
+  <a href="/" class="name">Josh Friedman</a>
+  <div class="links">
+    <a href="/about" class:list={[{ active: pathname === '/about' }]}>About</a>
+    <a href="/changelog" class:list={[{ active: pathname === '/changelog' }]}>Changelog</a>
+    <a href="/writing" class:list={[{ active: pathname === '/writing' }]}>Writing</a>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+      <span class="sun">☀</span>
+      <span class="moon">☽</span>
+    </button>
+  </div>
+</nav>
+
+<style>
+  .active {
+    color: var(--text) !important;
+  }
+  .moon { display: none; }
+  :global([data-theme="dark"]) .sun { display: none; }
+  :global([data-theme="dark"]) .moon { display: inline; }
+</style>
+
+<script>
+  const toggle = document.getElementById('theme-toggle');
+  toggle?.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+</script>

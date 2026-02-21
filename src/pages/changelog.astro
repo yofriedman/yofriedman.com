@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allChangelog = await getCollection('changelog');
+const entries = allChangelog.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+function formatDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+---
+
+<BaseLayout title="Changelog">
+  <div class="page-header">
+    <h1>Changelog</h1>
+    <p>A running log of what I'm building, thinking, and shipping.</p>
+  </div>
+
+  {entries.map(async (entry) => {
+    const { Content } = await entry.render();
+    return (
+      <div class="changelog-entry">
+        <div class="changelog-date">{formatDate(entry.data.date)}</div>
+        <div class="changelog-body"><Content /></div>
+        {entry.data.tags.length > 0 && (
+          <div class="changelog-tags">
+            {entry.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        )}
+      </div>
+    );
+  })}
+</BaseLayout>
