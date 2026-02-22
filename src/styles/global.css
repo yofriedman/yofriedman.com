@@ -185,9 +185,9 @@ hr {
 
 /* ── Footer ── */
 .site-footer {
-  padding: var(--space-2xl) 0 var(--space-xl);
+  padding: var(--space-lg) 0;
   border-top: 1px solid var(--border);
-  margin-top: var(--space-3xl);
+  margin-top: var(--space-2xl);
 }
 
 .site-footer p {
