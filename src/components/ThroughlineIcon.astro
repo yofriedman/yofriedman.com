@@ -46,7 +46,7 @@
         edges.push([i, j]);
 
     // Timing
-    const PULSE = 1.1;   // longer pulse to grab attention
+    const PULSE = 1.5;   // intro pulse duration
     const GAP = 0.55;
     const SLIDE = 0.6;
 
@@ -60,17 +60,17 @@
 
     // Cycle phases
     const BUILD_END    = slideStart(N - 1) + SLIDE; // ~3.9s — all vertices fully out
-    const ACCEL_DUR    = 25.0;  // 25s of gradual acceleration: +1% speed per second, up to +25%
-    const PAUSE_DUR    = 0.4;   // stopped — shape holds before collapsing
-    const COLLAPSE_DUR = 1.2;   // shrink back to dot
-    const DOT_DUR      = 0.5;   // single dot fades out
+    const ACCEL_DUR    = 10.0;  // 10s ramp: 1x → 3x
+    const PAUSE_DUR    = 0.4;   // abrupt stop — shape holds before collapsing
+    const COLLAPSE_DUR = 0.5;   // quick collapse back to dot
+    const DOT_DUR      = 0.3;   // single dot fades out
 
     const ACCEL_END    = BUILD_END + ACCEL_DUR;
     const PAUSE_END    = ACCEL_END + PAUSE_DUR;
     const COLLAPSE_END = PAUSE_END + COLLAPSE_DUR;
     const CYCLE        = COLLAPSE_END + DOT_DUR;     // ~31s total
 
-    const SPEED = (2 * Math.PI) / 45; // base rotation speed
+    const SPEED = (2 * Math.PI) / 15; // base rotation speed — one full turn every 15s
 
     // Create SVG elements
     const lineEls = edges.map(() => {
@@ -88,19 +88,29 @@
     });
 
     // 3D projection — CX offset left to align with text margin
-    const RAD = 32, CX = 36, CY = 50, TILT = 0.3;
-    const cT = Math.cos(TILT), sT = Math.sin(TILT);
+    const RAD = 32, CX = 36, CY = 50;
+    const TILT_AMOUNT = 0.35;                      // axis tilt from vertical (radians)
+    const DRIFT_SPEED = (2 * Math.PI) / 90;        // full precession every 90s
 
     function easeOut(t: number) { return 1 - Math.pow(1 - t, 3); }
     function easeIn(t: number)  { return t * t * t; }
     function depth(z: number)   { return 0.4 + 0.6 * (z + 1) / 2; }
 
-    function project(p: number[], a: number) {
-      const cA = Math.cos(a), sA = Math.sin(a);
-      const x  = p[0] * cA + p[2] * sA;
-      const y1 = p[1];
-      const z1 = -p[0] * sA + p[2] * cA;
-      return [CX + x * RAD, CY + (y1 * cT - z1 * sT) * RAD, y1 * sT + z1 * cT];
+    function project(p: number[], a: number, drift: number) {
+      // Rotation axis: tilted TILT_AMOUNT from vertical, azimuth slowly drifts
+      const ax = Math.sin(TILT_AMOUNT) * Math.cos(drift);
+      const ay = Math.cos(TILT_AMOUNT);
+      const az = Math.sin(TILT_AMOUNT) * Math.sin(drift);
+      // Rodrigues' rotation of p around axis [ax,ay,az] by angle a
+      const cosA = Math.cos(a), sinA = Math.sin(a);
+      const dot   = p[0]*ax + p[1]*ay + p[2]*az;
+      const cx = ay*p[2] - az*p[1];
+      const cy = az*p[0] - ax*p[2];
+      const cz = ax*p[1] - ay*p[0];
+      const rx = p[0]*cosA + cx*sinA + ax*dot*(1-cosA);
+      const ry = p[1]*cosA + cy*sinA + ay*dot*(1-cosA);
+      const rz = p[2]*cosA + cz*sinA + az*dot*(1-cosA);
+      return [CX + rx * RAD, CY + ry * RAD, rz];
     }
 
     // Vertex position within a cycle — builds out, holds while accelerating, then collapses
@@ -120,9 +130,10 @@
       return [0, 0, 0];
     }
 
-    let startTime: number | null = null;
-    let angle    = 0;
-    let lastRawT = 0;
+    let startTime:  number | null = null;
+    let angle      = 0;
+    let driftAngle = 0;
+    let lastRawT   = 0;
 
     function frame(ts: number) {
       if (!startTime) startTime = ts;
@@ -132,19 +143,20 @@
 
       const t = rawT % CYCLE;
 
-      // Speed: +1% per second after build, capped at +25%, stopped during pause/collapse/dot
+      // Speed: linearly 1x → 2x over 25s, stopped during pause/collapse/dot
       let speed = SPEED;
       if (t >= BUILD_END && t < ACCEL_END) {
         const elapsed = t - BUILD_END;             // 0 → 25s
         const pct     = elapsed / ACCEL_DUR;       // 0 → 1
-        speed = SPEED * (1 + pct * 0.25);          // 1x → 1.25x linearly
+        speed = SPEED * (1 + easeOut(pct) * 2);     // 1x → 3x, logarithmic curve
       } else if (t >= ACCEL_END) {
         speed = 0; // stopped: pause, collapse, dot
       }
-      angle += speed * dt;
+      angle      += speed * dt;
+      driftAngle += DRIFT_SPEED * dt;
 
       const vpos = pos.map((_, i) => vertexPos(i, t));
-      const proj = vpos.map(vp => project(vp, angle));
+      const proj = vpos.map(vp => project(vp, angle, driftAngle));
 
       circleEls.forEach((el, i) => {
         // Initial big pulse for vertex 0 (plays each cycle restart)
@@ -152,12 +164,10 @@
           const p = t / PULSE;
           const o = Math.min(1, p * 4);
           let r: number;
-          if (p < 0.12)      r = 7.2 * (p / 0.12);
-          else if (p < 0.28) r = 7.2 - 3 * ((p - 0.12) / 0.16);
-          else if (p < 0.45) r = 4.2 + 2 * ((p - 0.28) / 0.17);
-          else if (p < 0.65) r = 6.2 - 3 * ((p - 0.45) / 0.2);
-          else if (p < 0.82) r = 3.2 + 0.8 * ((p - 0.65) / 0.17);
-          else                r = 4 - 1.5 * ((p - 0.82) / 0.18);
+          if (p < 0.08)      r = 12 * (p / 0.08);              // 0 → 12: pop in big
+          else if (p < 0.22) r = 12 + 4 * ((p - 0.08) / 0.14); // 12 → 16: pulse up
+          else if (p < 0.40) r = 16 - 6 * ((p - 0.22) / 0.18); // 16 → 10: pulse back
+          else                r = 10 - 7.5 * ((p - 0.40) / 0.60); // 10 → 2.5: settle
           el.setAttribute('cx', proj[0][0].toFixed(1));
           el.setAttribute('cy', proj[0][1].toFixed(1));
           el.setAttribute('r', r.toFixed(2));
@@ -233,7 +243,7 @@
 
     if (reduced) {
       // Static: full octahedron at rest
-      const proj = pos.map(p => project(p, 0));
+      const proj = pos.map(p => project(p, 0, 0));
       circleEls.forEach((el, i) => {
         const [px, py, z] = proj[i];
         const d = depth(z);
