@@ -10,6 +10,7 @@
 <style is:global>
   .throughline-icon {
     margin-bottom: var(--space-md);
+    margin-left: -13px;
   }
   .tl-svg circle {
     fill: var(--accent);
@@ -81,7 +82,7 @@
     });
     const circleEls = pos.map(() => {
       const el = document.createElementNS(NS, 'circle');
-      el.setAttribute('r', '2.5');
+      el.setAttribute('r', '4.7');
       el.setAttribute('opacity', '0');
       svg.appendChild(el);
       return el;
@@ -167,7 +168,7 @@
           if (p < 0.08)      r = 12 * (p / 0.08);              // 0 → 12: pop in big
           else if (p < 0.22) r = 12 + 4 * ((p - 0.08) / 0.14); // 12 → 16: pulse up
           else if (p < 0.40) r = 16 - 6 * ((p - 0.22) / 0.18); // 16 → 10: pulse back
-          else                r = 10 - 7.5 * ((p - 0.40) / 0.60); // 10 → 2.5: settle
+          else                r = 10 - 5.3 * ((p - 0.40) / 0.60); // 10 → 4.7: settle
           el.setAttribute('cx', proj[0][0].toFixed(1));
           el.setAttribute('cy', proj[0][1].toFixed(1));
           el.setAttribute('r', r.toFixed(2));
@@ -184,12 +185,12 @@
 
         const [px, py, z] = proj[i];
         const d = depth(z);
-        let r = 2.5, o = 1;
+        let r = 4.7, o = 1;
 
         // Fade-in pop for newly born vertices
         if (i > 0 && age < 0.15) {
           const p = age / 0.15;
-          r = 2.5 * p;
+          r = 4.7 * p;
           o = p;
         }
 
@@ -249,7 +250,7 @@
         const d = depth(z);
         el.setAttribute('cx', px.toFixed(1));
         el.setAttribute('cy', py.toFixed(1));
-        el.setAttribute('r', (2.5 * d).toFixed(2));
+        el.setAttribute('r', (4.7 * d).toFixed(2));
         el.setAttribute('opacity', d.toFixed(2));
       });
       edges.forEach(([i, j], idx) => {
