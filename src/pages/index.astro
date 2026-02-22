@@ -1,11 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ThroughlineIcon from '../components/ThroughlineIcon.astro';
 import { getCollection } from 'astro:content';
 
 const allChangelog = await getCollection('changelog');
 const latestChangelog = allChangelog
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 5);
+  .slice(0, 3);
 
 const allWriting = await getCollection('writing', ({ data }) => data.published);
 const latestWriting = allWriting
@@ -19,9 +20,12 @@ function formatDate(date: Date) {
 
 <BaseLayout>
   <div class="intro">
-    <h1>Josh Friedman</h1>
+    <ThroughlineIcon />
     <p>
-      I build custom business systems — websites, dashboards, automations, data pipelines — using AI, in days instead of months. Marketing strategist turned builder. Based in Boston.
+      Product marketer and builder with a love for brand strategy, creative production, and figuring out why things matter and how to make people feel it.
+    </p>
+    <p>
+      Currently leading Product Marketing at <a href="https://www.whoop.com/us/en/" target="_blank" rel="noopener">WHOOP</a>. Lately building with AI in ways that changed how I think about work.
     </p>
   </div>
 
@@ -37,11 +41,6 @@ function formatDate(date: Date) {
           <div class="changelog-entry">
             <div class="changelog-date">{formatDate(entry.data.date)}</div>
             <div class="changelog-body"><Content /></div>
-            {entry.data.tags.length > 0 && (
-              <div class="changelog-tags">
-                {entry.data.tags.map((tag) => <span class="tag">{tag}</span>)}
-              </div>
-            )}
           </div>
         );
       })}
@@ -65,4 +64,13 @@ function formatDate(date: Date) {
       ))}
     </section>
   )}
+
+  <section class="say-yo">
+    <h2>Say Yo</h2>
+    <ul>
+      <li>X: <a href="https://x.com/yo_friedman/" target="_blank" rel="noopener">@yo_friedman</a></li>
+      <li>LinkedIn: <a href="https://www.linkedin.com/in/yofriedman/" target="_blank" rel="noopener">yofriedman</a></li>
+      <li>GitHub: <a href="https://github.com/yofriedman" target="_blank" rel="noopener">yofriedman</a></li>
+    </ul>
+  </section>
 </BaseLayout>

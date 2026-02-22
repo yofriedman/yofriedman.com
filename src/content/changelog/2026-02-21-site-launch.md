@@ -1,6 +1,6 @@
 ---
 date: 2026-02-21
-tags: [personal, shipping]
+tags: [shipping]
 ---
 
-Launched yofriedman.com. Built with Astro, deployed on Vercel. The whole thing — design system, four pages, content collections, dark mode — built in a single session with Claude Code. The site is a living changelog, not a static portfolio.
+Launched yofriedman.com. Built with Astro, deployed on Vercel. Design system, four pages, content collections, dark mode. The site is a living changelog drafted by an agent and edited by me, capturing what I'm building with AI and why.

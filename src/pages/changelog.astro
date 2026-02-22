@@ -22,11 +22,6 @@ function formatDate(date: Date) {
       <div class="changelog-entry">
         <div class="changelog-date">{formatDate(entry.data.date)}</div>
         <div class="changelog-body"><Content /></div>
-        {entry.data.tags.length > 0 && (
-          <div class="changelog-tags">
-            {entry.data.tags.map((tag) => <span class="tag">{tag}</span>)}
-          </div>
-        )}
       </div>
     );
   })}

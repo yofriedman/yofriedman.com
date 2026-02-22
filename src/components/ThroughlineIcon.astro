@@ -1,0 +1,192 @@
+---
+// Throughline icon — dot pulses, splits, grows through shapes:
+// dot → line → triangle → diamond → octahedron. Rotates in 3D.
+---
+
+<div class="throughline-icon" aria-hidden="true">
+  <svg class="tl-svg" viewBox="0 0 100 100" width="64" height="64"></svg>
+</div>
+
+<style is:global>
+  .throughline-icon {
+    margin-bottom: var(--space-md);
+  }
+  .tl-svg circle {
+    fill: var(--accent);
+  }
+  .tl-svg line {
+    stroke: var(--text);
+    stroke-width: 1.2;
+  }
+</style>
+
+<script>
+  (function () {
+    const svg = document.querySelector('.tl-svg');
+    if (!svg) return;
+    const NS = 'http://www.w3.org/2000/svg';
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Octahedron — 6 vertices, perfectly symmetric.
+    // Build order: top, bottom (line), right (triangle), left (diamond), front (3D), back (complete)
+    const pos = [
+      [0, -1, 0],    // 0: top
+      [0, 1, 0],     // 1: bottom  → line
+      [1, 0, 0],     // 2: right   → triangle
+      [-1, 0, 0],    // 3: left    → diamond
+      [0, 0, 1],     // 4: front   → 3D begins
+      [0, 0, -1],    // 5: back    → octahedron complete
+    ];
+    const N = pos.length;
+
+    // Fully connected (15 edges)
+    const edges: [number, number][] = [];
+    for (let i = 0; i < N; i++)
+      for (let j = i + 1; j < N; j++)
+        edges.push([i, j]);
+
+    // Timing
+    const PULSE = 1.1;   // longer pulse to grab attention
+    const GAP = 0.55;
+    const SLIDE = 0.6;
+
+    function slideStart(i: number) {
+      if (i === 0) return PULSE;
+      return PULSE + (i - 1) * GAP;
+    }
+    function birthTime(i: number) {
+      return i === 0 ? 0 : slideStart(i);
+    }
+
+    // Create SVG elements
+    const lineEls = edges.map(() => {
+      const el = document.createElementNS(NS, 'line');
+      el.setAttribute('opacity', '0');
+      svg.appendChild(el);
+      return el;
+    });
+    const circleEls = pos.map(() => {
+      const el = document.createElementNS(NS, 'circle');
+      el.setAttribute('r', '2.5');
+      el.setAttribute('opacity', '0');
+      svg.appendChild(el);
+      return el;
+    });
+
+    // 3D projection — CX offset left to align with text margin
+    const RAD = 32, CX = 36, CY = 50, TILT = 0.3;
+    const cT = Math.cos(TILT), sT = Math.sin(TILT);
+    const SPEED = (2 * Math.PI) / 45;
+
+    function easeOut(t: number) { return 1 - Math.pow(1 - t, 3); }
+
+    function project(p: number[], a: number) {
+      const cA = Math.cos(a), sA = Math.sin(a);
+      const x = p[0] * cA + p[2] * sA;
+      const y1 = p[1];
+      const z1 = -p[0] * sA + p[2] * cA;
+      return [CX + x * RAD, CY + (y1 * cT - z1 * sT) * RAD, y1 * sT + z1 * cT];
+    }
+
+    function depth(z: number) { return 0.4 + 0.6 * (z + 1) / 2; }
+
+    function curPos(i: number, t: number): number[] {
+      const ss = slideStart(i);
+      const elapsed = t - ss;
+      if (elapsed <= 0) return [0, 0, 0];
+      const p = Math.min(1, elapsed / SLIDE);
+      const e = easeOut(p);
+      return [pos[i][0] * e, pos[i][1] * e, pos[i][2] * e];
+    }
+
+    let start: number | null = null;
+
+    function frame(ts: number) {
+      if (!start) start = ts;
+      const t = (ts - start) / 1000;
+      const angle = t * SPEED;
+      const proj = pos.map((_, i) => project(curPos(i, t), angle));
+
+      circleEls.forEach((el, i) => {
+        const bt = birthTime(i);
+        const age = t - bt;
+        if (age < 0) return;
+        const [px, py, z] = proj[i];
+
+        // First dot: big pulse at center before split
+        if (i === 0 && t < PULSE) {
+          const p = t / PULSE;
+          const o = Math.min(1, p * 4);
+          let r: number;
+          if (p < 0.12)      r = 7.2 * (p / 0.12);          // grow big
+          else if (p < 0.28) r = 7.2 - 3 * ((p - 0.12) / 0.16);  // shrink
+          else if (p < 0.45) r = 4.2 + 2 * ((p - 0.28) / 0.17);  // bounce up
+          else if (p < 0.65) r = 6.2 - 3 * ((p - 0.45) / 0.2);   // shrink
+          else if (p < 0.82) r = 3.2 + 0.8 * ((p - 0.65) / 0.17);// small bounce
+          else                r = 4 - 1.5 * ((p - 0.82) / 0.18);  // settle to 2.5
+          el.setAttribute('cx', px.toFixed(1));
+          el.setAttribute('cy', py.toFixed(1));
+          el.setAttribute('r', r.toFixed(2));
+          el.setAttribute('opacity', o.toFixed(2));
+          return;
+        }
+
+        const d = depth(z);
+        let r = 2.5, o = 1;
+        if (i > 0 && age < 0.15) {
+          const p = age / 0.15;
+          r = 2.5 * p;
+          o = p;
+        }
+        el.setAttribute('cx', px.toFixed(1));
+        el.setAttribute('cy', py.toFixed(1));
+        el.setAttribute('r', (r * d).toFixed(2));
+        el.setAttribute('opacity', (o * d).toFixed(2));
+      });
+
+      edges.forEach(([i, j], idx) => {
+        const iAge = t - birthTime(i);
+        const jAge = t - birthTime(j);
+        if (iAge < 0 || jAge < 0) {
+          lineEls[idx].setAttribute('opacity', '0');
+          return;
+        }
+        const laterAge = Math.min(iAge, jAge);
+        const fadeIn = Math.min(1, laterAge / 0.3);
+        const [x1, y1, z1] = proj[i];
+        const [x2, y2, z2] = proj[j];
+        const avgD = depth((z1 + z2) / 2);
+        lineEls[idx].setAttribute('x1', x1.toFixed(1));
+        lineEls[idx].setAttribute('y1', y1.toFixed(1));
+        lineEls[idx].setAttribute('x2', x2.toFixed(1));
+        lineEls[idx].setAttribute('y2', y2.toFixed(1));
+        lineEls[idx].setAttribute('opacity', (0.25 * avgD * fadeIn).toFixed(2));
+      });
+
+      requestAnimationFrame(frame);
+    }
+
+    if (reduced) {
+      const proj = pos.map(p => project(p, 0));
+      circleEls.forEach((el, i) => {
+        const [px, py, z] = proj[i];
+        const d = depth(z);
+        el.setAttribute('cx', px.toFixed(1));
+        el.setAttribute('cy', py.toFixed(1));
+        el.setAttribute('r', (2.5 * d).toFixed(2));
+        el.setAttribute('opacity', d.toFixed(2));
+      });
+      edges.forEach(([i, j], idx) => {
+        const [x1, y1, z1] = proj[i];
+        const [x2, y2, z2] = proj[j];
+        lineEls[idx].setAttribute('x1', x1.toFixed(1));
+        lineEls[idx].setAttribute('y1', y1.toFixed(1));
+        lineEls[idx].setAttribute('x2', x2.toFixed(1));
+        lineEls[idx].setAttribute('y2', y2.toFixed(1));
+        lineEls[idx].setAttribute('opacity', (0.25 * depth((z1 + z2) / 2)).toFixed(2));
+      });
+    } else {
+      requestAnimationFrame(frame);
+    }
+  })();
+</script>

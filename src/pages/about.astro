@@ -1,49 +1,84 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const timeline = [
+  {
+    title: "Massachusetts AI Coalition",
+    period: "2026, Boston",
+    url: "https://massaicoalition.com/",
+    body: "Co-leading the BANNERS task force, the storytelling arm of the Massachusetts AI Coalition. Mission: add 100 new voices for Massachusetts. Podcasters, creators, writers, builders carrying the story of what's happening here into every boardroom and every channel.",
+  },
+  {
+    title: "WHOOP",
+    period: "2023\u2013present, Boston",
+    url: "https://www.whoop.com/us/en/",
+    body: 'Leading product marketing at the human performance company creating the future of healthcare. PMM is the translation layer between product and brand: grounded in consumer truth, informing what gets built, shaping the stories we tell. Building a team of sharp humans and AI agents working side by side, using agentic workflows to do knowledge work in ways that didn\'t exist a year ago. Came to WHOOP through the <a href="https://athletechnews.com/whoop-buys-anyquestion-boosting-ai-chat-capabilities/" target="_blank" rel="noopener">AnyQuestion</a> acquisition and stayed to build something new.',
+  },
+  {
+    title: "AnyQuestion",
+    period: "2022\u20132023",
+    body: 'Led Product for a seed-stage AI-powered knowledge-sharing platform connecting experts and learners through questions and answers. Defined brand, product vision, strategy, and roadmap. Acquired by <a href="https://www.whoop.com/us/en/" target="_blank" rel="noopener">WHOOP</a>.',
+  },
+  {
+    title: "Own Up",
+    period: "2020\u20132022, Boston",
+    url: "https://www.ownup.com/",
+    body: "Led Brand Marketing for a Series A fintech making mortgage shopping more transparent. Performance media, creative strategy, brand identity, PR. Own Up was acquired by Experian in 2026.",
+  },
+  {
+    title: "Studio Cadre",
+    period: "2017\u20132020, LA",
+    body: 'Co-founded the Clio award-winning communication design studio with <a href="https://www.radleystudios.tv/#1" target="_blank" rel="noopener">Eric Del Greco</a>. Clients included Fox Searchlight, HBO, and the <a href="https://elizabethtaylor.com/" target="_blank" rel="noopener">Elizabeth Taylor Trust</a> on projects that spanned strategy, design, and technology.',
+  },
+  {
+    title: "Freelance",
+    period: "2016\u20132017, LA",
+    body: 'Consulting for agencies like Troika, mOcean, and <a href="https://www.radleystudios.tv/#1" target="_blank" rel="noopener">Radley</a> across entertainment, apparel, and education. The year between leaving a job and starting a company, figuring out what I actually wanted to build.',
+  },
+  {
+    title: "Radley Studios",
+    period: "2010\u20132016, LA",
+    url: "https://www.radleystudios.tv/#1",
+    body: 'Five years, three roles, from associate producer to director of brand strategy. Soup-to-nuts creative production in Koreatown. Radley is where I learned how to make things, how to ship them, how to think about audiences. Helped launch <a href="https://www.roka.com/" target="_blank" rel="noopener">ROKA Sports</a> and ran the account, which is where I first learned the DTC playbook.',
+  },
+  {
+    title: "Mandate Pictures",
+    period: "2009\u20132010, LA",
+    body: "Development intern at the studio behind Juno. Read a lot of scripts. Covered executive desks. Realized I didn't want to work in feature development.",
+  },
+  {
+    title: "Northern Light Productions",
+    period: "2008, Boston",
+    url: "https://nlprod.com/",
+    body: "Post-production assistant on a PBS documentary about land use in Portland, Oregon. Learned how to make a film through the post-production process.",
+  },
+];
 ---
 
 <BaseLayout title="About">
   <div class="page-header">
     <h1>About</h1>
+    <p>I've spent my career making things — in production houses, design studios, startups, and now in tech. Here's where I've been.</p>
   </div>
 
-  <div class="about-content">
-    <p>
-      I'm Josh Friedman. I build custom business systems — websites, dashboards, automations, data pipelines — using AI, in days instead of months, at a fraction of what agencies charge. When I'm done, you own everything and can run it yourself.
-    </p>
-
-    <p>
-      The path here wasn't linear. I started in creative production and brand strategy, then co-founded a design studio in LA where we built brands and campaigns for Fox Searchlight, HBO, and the Elizabeth Taylor Trust. I led product at a social Q&A platform called AnyQuestion, which was acquired by WHOOP — where I spent the next several years leading Product Marketing.
-    </p>
-
-    <p>
-      Along the way I became obsessed with a question: what happens when AI stops being a tool you use and starts being a medium you build with? The answer changed everything about how I work. I built an AI-powered operating system for my own life — an agentic workflow that handles meeting capture, task management, research, writing, and analysis. Not as a side project. As the way I actually work, every day.
-    </p>
-
-    <p>
-      That system — and the thinking behind it — became the foundation for what I do now. I help people and teams see their work differently, then rebuild it. The system is the proof. The insight is the offering.
-    </p>
-
-    <h2>What I believe</h2>
-
-    <p>
-      Software isn't something you buy. It's something you can build. The tools got that good. An invoice pipeline that saves 15 hours a week, a custom dashboard that replaces three SaaS subscriptions, a website that's live in a week instead of three months — these aren't hypotheticals. They're Tuesday.
-    </p>
-
-    <p>
-      The moat isn't technical. The moat is knowing <em>what</em> to build — domain judgment that no tool provides — and transferring the capability so you're not dependent on anyone, including me.
-    </p>
-
-    <h2>This site</h2>
-
-    <p>
-      This site is built with <a href="https://astro.build">Astro</a>, deployed on <a href="https://vercel.com">Vercel</a>, and written in markdown. The <a href="/changelog">changelog</a> is a running feed of what I'm building, thinking, and shipping. Not a portfolio. A living document.
-    </p>
-
-    <div class="about-links">
-      <a href="https://linkedin.com/in/yofriedman">LinkedIn</a>
-      <a href="https://x.com/yofriedman">X</a>
-      <a href="mailto:josh@yofriedman.com">Email</a>
-    </div>
+  <div class="timeline">
+    {timeline.map((entry, i) => (
+      <div class="timeline-entry">
+        <div class="timeline-track">
+          <div class="timeline-dot" />
+          {i < timeline.length - 1 && <div class="timeline-line" />}
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-period">{entry.period}</div>
+          {entry.url ? (
+            <h3 class="timeline-title"><a href={entry.url} target="_blank" rel="noopener">{entry.title}</a></h3>
+          ) : (
+            <h3 class="timeline-title">{entry.title}</h3>
+          )}
+          <p class="timeline-body" set:html={entry.body} />
+        </div>
+      </div>
+    ))}
   </div>
+
 </BaseLayout>
