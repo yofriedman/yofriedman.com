@@ -1,19 +1,16 @@
 import type { APIRoute } from 'astro';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
-async function loadFont(): Promise<ArrayBuffer> {
-  const css = await fetch(
-    'https://fonts.googleapis.com/css2?family=Manrope:wght@700&display=swap',
-    { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)' } }
-  ).then(r => r.text());
-  const match = css.match(/src: url\((.+?)\) format\('woff2'\)/);
-  if (!match?.[1]) throw new Error('Font URL not found in Google Fonts response');
-  return fetch(match[1]).then(r => r.arrayBuffer());
+function loadFont(): ArrayBuffer {
+  const fontPath = path.join(process.cwd(), 'public/fonts/Manrope-Bold.ttf');
+  return readFileSync(fontPath).buffer as ArrayBuffer;
 }
 
 export const GET: APIRoute = async () => {
-  const fontData = await loadFont();
+  const fontData = loadFont();
 
   const svg = await satori(
     {
