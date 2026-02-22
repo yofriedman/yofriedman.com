@@ -10,7 +10,7 @@ const pathname = Astro.url.pathname;
   <div class="links">
     <a href="/about" class:list={[{ active: pathname === '/about' }]}>About</a>
     <a href="/changelog" class:list={[{ active: pathname === '/changelog' }]}>Changelog</a>
-    <a href="/writing" class:list={[{ active: pathname === '/writing' }]}>Writing</a>
+    {/* <a href="/writing" class:list={[{ active: pathname === '/writing' }]}>Writing</a> */}
     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
       <span class="toggle-track">
         <span class="toggle-icon">

@@ -164,6 +164,11 @@ hr {
   flex-direction: column;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  transition: color 0.15s ease;
+}
+
+.site-nav .name:hover {
+  color: var(--accent);
 }
 
 .site-nav .links {
