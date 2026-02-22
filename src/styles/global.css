@@ -136,6 +136,15 @@ hr {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-sm) 0;
+}
+
+@media (max-width: 480px) {
+  .site-nav .name {
+    width: 100%;
+    margin-bottom: var(--space-xs);
+  }
 }
 
 .site-nav .name {
