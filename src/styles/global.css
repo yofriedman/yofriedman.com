@@ -135,20 +135,27 @@ hr {
   padding: var(--space-xl) 0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .site-nav .name {
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 1.45rem;
+  line-height: 0.95;
   text-decoration: none;
   color: var(--text);
+  display: flex;
+  flex-direction: column;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .site-nav .links {
   display: flex;
   gap: var(--space-lg);
   align-items: center;
+  padding-top: 0.2rem;
 }
 
 .site-nav .links a {
