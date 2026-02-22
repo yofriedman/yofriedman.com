@@ -8,6 +8,17 @@ const entries = allChangelog.sort((a, b) => b.data.date.getTime() - a.data.date.
 function formatDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
+
+function formatDateDisplay(date: Date) {
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const d = date.getUTCDate();
+  const suffix = d === 1 || d === 21 || d === 31 ? 'st'
+               : d === 2 || d === 22 ? 'nd'
+               : d === 3 || d === 23 ? 'rd'
+               : 'th';
+  return `${months[date.getUTCMonth()]} ${d}${suffix}, ${date.getUTCFullYear()}`;
+}
 ---
 
 <BaseLayout title="Changelog">
@@ -16,13 +27,24 @@ function formatDate(date: Date) {
     <p>A running log of what I'm building, thinking, shipping, and learning.</p>
   </div>
 
-  {entries.map(async (entry) => {
-    const { Content } = await entry.render();
-    return (
-      <div class="changelog-entry">
-        <div class="changelog-date">{formatDate(entry.data.date)}</div>
-        <div class="changelog-body"><Content /></div>
-      </div>
-    );
-  })}
+  <div class="cl-timeline">
+    {entries.map(async (entry, i) => {
+      const { Content } = await entry.render();
+      const isContinuation = i > 0 && formatDate(entry.data.date) === formatDate(entries[i - 1].data.date);
+      const isFollowedByContinuation = i < entries.length - 1 && formatDate(entry.data.date) === formatDate(entries[i + 1].data.date);
+      const showLine = i < entries.length - 1 || isContinuation;
+      return (
+        <div class:list={['cl-entry', { 'cl-entry--group-continues': isFollowedByContinuation }]}>
+          <div class:list={['cl-track', { 'cl-track--continuation': isContinuation }]}>
+            {!isContinuation && <div class:list={['cl-dot', { 'cl-dot--latest': i === 0 }]} />}
+            {showLine && <div class="cl-line" />}
+          </div>
+          <div class:list={['cl-content', { 'cl-content--continuation': isContinuation }]}>
+            {!isContinuation && <div class="cl-date">{formatDateDisplay(entry.data.date)}</div>}
+            <div class="cl-body"><Content /></div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
 </BaseLayout>
