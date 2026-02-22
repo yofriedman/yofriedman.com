@@ -145,6 +145,12 @@ hr {
     width: 100%;
     margin-bottom: var(--space-xs);
   }
+  .site-nav .links {
+    width: 100%;
+  }
+  .site-nav .links .theme-toggle {
+    margin-left: auto;
+  }
 }
 
 .site-nav .name {
