@@ -1,60 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <!--
-    Static frame of ThroughlineIcon octahedron.
-    6 vertices projected at angle=0.7, tilt=0.3, RAD=12, center=(16,16).
-    Vertex positions:
-      0 top    (16.0,  4.5) d=0.61
-      1 bottom (16.0, 27.5) d=0.79
-      2 right  (25.2, 18.3) d=0.52
-      3 left   ( 6.8, 13.7) d=0.89
-      4 front  (23.7, 13.3) d=0.92
-      5 back   ( 8.3, 18.7) d=0.48
-  -->
-
-  <!-- Background -->
   <rect width="32" height="32" rx="7" fill="#111214"/>
-
-  <!-- Edges — stroke opacity = 0.28 * avg vertex depth -->
-  <g stroke="#F4F2ED" stroke-width="0.75" stroke-linecap="round" fill="none">
-    <!-- (0,1) top–bottom -->
-    <line x1="16.0" y1="4.5"  x2="16.0" y2="27.5" opacity="0.20"/>
-    <!-- (0,2) top–right -->
-    <line x1="16.0" y1="4.5"  x2="25.2" y2="18.3" opacity="0.16"/>
-    <!-- (0,3) top–left -->
-    <line x1="16.0" y1="4.5"  x2="6.8"  y2="13.7" opacity="0.21"/>
-    <!-- (0,4) top–front -->
-    <line x1="16.0" y1="4.5"  x2="23.7" y2="13.3" opacity="0.21"/>
-    <!-- (0,5) top–back -->
-    <line x1="16.0" y1="4.5"  x2="8.3"  y2="18.7" opacity="0.15"/>
-    <!-- (1,2) bottom–right -->
-    <line x1="16.0" y1="27.5" x2="25.2" y2="18.3" opacity="0.18"/>
-    <!-- (1,3) bottom–left -->
-    <line x1="16.0" y1="27.5" x2="6.8"  y2="13.7" opacity="0.23"/>
-    <!-- (1,4) bottom–front -->
-    <line x1="16.0" y1="27.5" x2="23.7" y2="13.3" opacity="0.24"/>
-    <!-- (1,5) bottom–back -->
-    <line x1="16.0" y1="27.5" x2="8.3"  y2="18.7" opacity="0.18"/>
-    <!-- (2,3) right–left -->
-    <line x1="25.2" y1="18.3" x2="6.8"  y2="13.7" opacity="0.20"/>
-    <!-- (2,4) right–front -->
-    <line x1="25.2" y1="18.3" x2="23.7" y2="13.3" opacity="0.20"/>
-    <!-- (2,5) right–back -->
-    <line x1="25.2" y1="18.3" x2="8.3"  y2="18.7" opacity="0.14"/>
-    <!-- (3,4) left–front -->
-    <line x1="6.8"  y1="13.7" x2="23.7" y2="13.3" opacity="0.25"/>
-    <!-- (3,5) left–back -->
-    <line x1="6.8"  y1="13.7" x2="8.3"  y2="18.7" opacity="0.19"/>
-    <!-- (4,5) front–back -->
-    <line x1="23.7" y1="13.3" x2="8.3"  y2="18.7" opacity="0.20"/>
-  </g>
-
-  <!-- Dots — fill tomato, r = 2.2 * depth -->
-  <g fill="#FF6542">
-    <circle cx="16.0" cy="4.5"  r="1.34" opacity="0.61"/> <!-- top -->
-    <circle cx="16.0" cy="27.5" r="1.74" opacity="0.79"/> <!-- bottom -->
-    <circle cx="25.2" cy="18.3" r="1.13" opacity="0.52"/> <!-- right -->
-    <circle cx="6.8"  cy="13.7" r="1.95" opacity="0.89"/> <!-- left -->
-    <circle cx="23.7" cy="13.3" r="2.02" opacity="0.92"/> <!-- front -->
-    <circle cx="8.3"  cy="18.7" r="1.06" opacity="0.48"/> <!-- back -->
-  </g>
+  <text
+    x="16" y="22"
+    text-anchor="middle"
+    font-family="Outfit, sans-serif"
+    font-weight="900"
+    font-size="17"
+    fill="#F4F2ED"
+    letter-spacing="0.02em"
+  >JF</text>
 </svg>
