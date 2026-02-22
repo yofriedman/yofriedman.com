@@ -4,7 +4,7 @@
 ---
 
 <div class="throughline-icon" aria-hidden="true">
-  <svg class="tl-svg" viewBox="0 0 100 100" width="77" height="77"></svg>
+  <svg class="tl-svg" viewBox="0 0 100 100" width="64" height="64"></svg>
 </div>
 
 <style is:global>
@@ -58,6 +58,20 @@
       return i === 0 ? 0 : slideStart(i);
     }
 
+    // Cycle phases
+    const BUILD_END    = slideStart(N - 1) + SLIDE; // ~3.9s — all vertices fully out
+    const ACCEL_DUR    = 25.0;  // 25s of gradual acceleration: +1% speed per second, up to +25%
+    const PAUSE_DUR    = 0.4;   // stopped — shape holds before collapsing
+    const COLLAPSE_DUR = 1.2;   // shrink back to dot
+    const DOT_DUR      = 0.5;   // single dot fades out
+
+    const ACCEL_END    = BUILD_END + ACCEL_DUR;
+    const PAUSE_END    = ACCEL_END + PAUSE_DUR;
+    const COLLAPSE_END = PAUSE_END + COLLAPSE_DUR;
+    const CYCLE        = COLLAPSE_END + DOT_DUR;     // ~31s total
+
+    const SPEED = (2 * Math.PI) / 45; // base rotation speed
+
     // Create SVG elements
     const lineEls = edges.map(() => {
       const el = document.createElementNS(NS, 'line');
@@ -76,68 +90,111 @@
     // 3D projection — CX offset left to align with text margin
     const RAD = 32, CX = 36, CY = 50, TILT = 0.3;
     const cT = Math.cos(TILT), sT = Math.sin(TILT);
-    const SPEED = (2 * Math.PI) / 45;
 
     function easeOut(t: number) { return 1 - Math.pow(1 - t, 3); }
+    function easeIn(t: number)  { return t * t * t; }
+    function depth(z: number)   { return 0.4 + 0.6 * (z + 1) / 2; }
 
     function project(p: number[], a: number) {
       const cA = Math.cos(a), sA = Math.sin(a);
-      const x = p[0] * cA + p[2] * sA;
+      const x  = p[0] * cA + p[2] * sA;
       const y1 = p[1];
       const z1 = -p[0] * sA + p[2] * cA;
       return [CX + x * RAD, CY + (y1 * cT - z1 * sT) * RAD, y1 * sT + z1 * cT];
     }
 
-    function depth(z: number) { return 0.4 + 0.6 * (z + 1) / 2; }
-
-    function curPos(i: number, t: number): number[] {
-      const ss = slideStart(i);
+    // Vertex position within a cycle — builds out, holds while accelerating, then collapses
+    function vertexPos(i: number, t: number): number[] {
+      const ss      = slideStart(i);
       const elapsed = t - ss;
       if (elapsed <= 0) return [0, 0, 0];
-      const p = Math.min(1, elapsed / SLIDE);
-      const e = easeOut(p);
-      return [pos[i][0] * e, pos[i][1] * e, pos[i][2] * e];
+      const builtScale = easeOut(Math.min(1, elapsed / SLIDE));
+      if (t < PAUSE_END) {
+        return [pos[i][0] * builtScale, pos[i][1] * builtScale, pos[i][2] * builtScale];
+      }
+      if (t < COLLAPSE_END) {
+        const cp    = (t - PAUSE_END) / COLLAPSE_DUR;
+        const scale = 1 - easeIn(cp);
+        return [pos[i][0] * scale, pos[i][1] * scale, pos[i][2] * scale];
+      }
+      return [0, 0, 0];
     }
 
-    let start: number | null = null;
+    let startTime: number | null = null;
+    let angle    = 0;
+    let lastRawT = 0;
 
     function frame(ts: number) {
-      if (!start) start = ts;
-      const t = (ts - start) / 1000;
-      const angle = t * SPEED;
-      const proj = pos.map((_, i) => project(curPos(i, t), angle));
+      if (!startTime) startTime = ts;
+      const rawT = (ts - startTime) / 1000;
+      const dt   = Math.min(rawT - lastRawT, 0.05);
+      lastRawT   = rawT;
+
+      const t = rawT % CYCLE;
+
+      // Speed: +1% per second after build, capped at +25%, stopped during pause/collapse/dot
+      let speed = SPEED;
+      if (t >= BUILD_END && t < ACCEL_END) {
+        const elapsed = t - BUILD_END;             // 0 → 25s
+        const pct     = elapsed / ACCEL_DUR;       // 0 → 1
+        speed = SPEED * (1 + pct * 0.25);          // 1x → 1.25x linearly
+      } else if (t >= ACCEL_END) {
+        speed = 0; // stopped: pause, collapse, dot
+      }
+      angle += speed * dt;
+
+      const vpos = pos.map((_, i) => vertexPos(i, t));
+      const proj = vpos.map(vp => project(vp, angle));
 
       circleEls.forEach((el, i) => {
-        const bt = birthTime(i);
-        const age = t - bt;
-        if (age < 0) return;
-        const [px, py, z] = proj[i];
-
-        // First dot: big pulse at center before split
+        // Initial big pulse for vertex 0 (plays each cycle restart)
         if (i === 0 && t < PULSE) {
           const p = t / PULSE;
           const o = Math.min(1, p * 4);
           let r: number;
-          if (p < 0.12)      r = 7.2 * (p / 0.12);          // grow big
-          else if (p < 0.28) r = 7.2 - 3 * ((p - 0.12) / 0.16);  // shrink
-          else if (p < 0.45) r = 4.2 + 2 * ((p - 0.28) / 0.17);  // bounce up
-          else if (p < 0.65) r = 6.2 - 3 * ((p - 0.45) / 0.2);   // shrink
-          else if (p < 0.82) r = 3.2 + 0.8 * ((p - 0.65) / 0.17);// small bounce
-          else                r = 4 - 1.5 * ((p - 0.82) / 0.18);  // settle to 2.5
-          el.setAttribute('cx', px.toFixed(1));
-          el.setAttribute('cy', py.toFixed(1));
+          if (p < 0.12)      r = 7.2 * (p / 0.12);
+          else if (p < 0.28) r = 7.2 - 3 * ((p - 0.12) / 0.16);
+          else if (p < 0.45) r = 4.2 + 2 * ((p - 0.28) / 0.17);
+          else if (p < 0.65) r = 6.2 - 3 * ((p - 0.45) / 0.2);
+          else if (p < 0.82) r = 3.2 + 0.8 * ((p - 0.65) / 0.17);
+          else                r = 4 - 1.5 * ((p - 0.82) / 0.18);
+          el.setAttribute('cx', proj[0][0].toFixed(1));
+          el.setAttribute('cy', proj[0][1].toFixed(1));
           el.setAttribute('r', r.toFixed(2));
           el.setAttribute('opacity', o.toFixed(2));
           return;
         }
 
+        const bt  = birthTime(i);
+        const age = t - bt;
+        if (age < 0) { el.setAttribute('opacity', '0'); return; }
+
+        // DOT phase: hide all but vertex 0
+        if (t >= COLLAPSE_END && i !== 0) { el.setAttribute('opacity', '0'); return; }
+
+        const [px, py, z] = proj[i];
         const d = depth(z);
         let r = 2.5, o = 1;
+
+        // Fade-in pop for newly born vertices
         if (i > 0 && age < 0.15) {
           const p = age / 0.15;
           r = 2.5 * p;
           o = p;
         }
+
+        // Collapse: fade out non-0 vertices as they converge to center
+        if (t >= PAUSE_END && i !== 0) {
+          const cp = (t - PAUSE_END) / COLLAPSE_DUR;
+          o *= (1 - easeIn(Math.min(1, cp)));
+        }
+
+        // DOT phase: vertex 0 fades out before cycle reset
+        if (t >= COLLAPSE_END && i === 0) {
+          const dp = (t - COLLAPSE_END) / DOT_DUR;
+          o *= (1 - dp);
+        }
+
         el.setAttribute('cx', px.toFixed(1));
         el.setAttribute('cy', py.toFixed(1));
         el.setAttribute('r', (r * d).toFixed(2));
@@ -145,28 +202,37 @@
       });
 
       edges.forEach(([i, j], idx) => {
+        if (t >= COLLAPSE_END) { lineEls[idx].setAttribute('opacity', '0'); return; }
+
         const iAge = t - birthTime(i);
         const jAge = t - birthTime(j);
-        if (iAge < 0 || jAge < 0) {
-          lineEls[idx].setAttribute('opacity', '0');
-          return;
-        }
+        if (iAge < 0 || jAge < 0) { lineEls[idx].setAttribute('opacity', '0'); return; }
+
         const laterAge = Math.min(iAge, jAge);
-        const fadeIn = Math.min(1, laterAge / 0.3);
+        const fadeIn   = Math.min(1, laterAge / 0.3);
         const [x1, y1, z1] = proj[i];
         const [x2, y2, z2] = proj[j];
         const avgD = depth((z1 + z2) / 2);
+        let lineO  = 0.25 * avgD * fadeIn;
+
+        // Fade edges during collapse
+        if (t >= PAUSE_END) {
+          const cp = (t - PAUSE_END) / COLLAPSE_DUR;
+          lineO *= (1 - easeIn(cp));
+        }
+
         lineEls[idx].setAttribute('x1', x1.toFixed(1));
         lineEls[idx].setAttribute('y1', y1.toFixed(1));
         lineEls[idx].setAttribute('x2', x2.toFixed(1));
         lineEls[idx].setAttribute('y2', y2.toFixed(1));
-        lineEls[idx].setAttribute('opacity', (0.25 * avgD * fadeIn).toFixed(2));
+        lineEls[idx].setAttribute('opacity', lineO.toFixed(2));
       });
 
       requestAnimationFrame(frame);
     }
 
     if (reduced) {
+      // Static: full octahedron at rest
       const proj = pos.map(p => project(p, 0));
       circleEls.forEach((el, i) => {
         const [px, py, z] = proj[i];
