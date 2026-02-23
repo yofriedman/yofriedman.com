@@ -5,6 +5,7 @@ const changelog = defineCollection({
   schema: z.object({
     date: z.coerce.date(),
     tags: z.array(z.string()).default([]),
+    order: z.number().default(0),
   }),
 });
 

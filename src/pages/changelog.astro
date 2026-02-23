@@ -3,7 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
 const allChangelog = await getCollection('changelog');
-const entries = allChangelog.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const entries = allChangelog.sort((a, b) => {
+  const dateDiff = b.data.date.getTime() - a.data.date.getTime();
+  if (dateDiff !== 0) return dateDiff;
+  return (b.data.order ?? 0) - (a.data.order ?? 0);
+});
 
 function formatDate(date: Date) {
   return date.toISOString().slice(0, 10);
