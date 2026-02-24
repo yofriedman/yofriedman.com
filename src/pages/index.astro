@@ -40,8 +40,26 @@ function formatDateDisplay(date: Date) {
     </p>
   </div>
 
-  {latestChangelog.length > 0 && (
+  {latestWriting.length > 0 && (
     <section>
+      <div class="section-header">
+        <h2>Writing</h2>
+        <a href="/writing">View all &rarr;</a>
+      </div>
+      {latestWriting.map((post) => (
+        <div class="writing-entry">
+          <div class="writing-title">
+            <a href={post.data.url || `/writing/${post.id}`}>{post.data.title}</a>
+          </div>
+          <div class="writing-meta">{formatDate(post.data.date)}</div>
+          {post.data.description && <p class="writing-description">{post.data.description}</p>}
+        </div>
+      ))}
+    </section>
+  )}
+
+  {latestChangelog.length > 0 && (
+    <section style="margin-top: var(--space-2xl);">
       <div class="section-header">
         <h2>Changelog</h2>
         <a href="/changelog">View all &rarr;</a>
@@ -66,24 +84,6 @@ function formatDateDisplay(date: Date) {
           );
         })}
       </div>
-    </section>
-  )}
-
-  {latestWriting.length > 0 && (
-    <section style="margin-top: var(--space-2xl);">
-      <div class="section-header">
-        <h2>Writing</h2>
-        <a href="/writing">View all &rarr;</a>
-      </div>
-      {latestWriting.map((post) => (
-        <div class="writing-entry">
-          <div class="writing-title">
-            <a href={post.data.url || `/writing/${post.id}`}>{post.data.title}</a>
-          </div>
-          <div class="writing-meta">{formatDate(post.data.date)}</div>
-          {post.data.description && <p class="writing-description">{post.data.description}</p>}
-        </div>
-      ))}
     </section>
   )}
 

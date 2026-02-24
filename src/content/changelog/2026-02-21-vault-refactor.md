@@ -1,6 +1,6 @@
 ---
 date: 2026-02-21
-tags: [building, throughline]
+tags: [building]
 ---
 
-Refactored the personal vault. Created a Massachusetts AI Coalition project space, consolidated standalone files under one roof. I like how the vault keeps getting simpler as the system gets smarter.
+Reorganized the personal knowledge base. Created a Massachusetts AI Coalition project space, consolidated standalone files under one roof. The system keeps getting simpler as it gets smarter.

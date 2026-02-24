@@ -1,6 +1,6 @@
 ---
 date: 2026-01-19
-tags: [building, throughline]
+tags: [building]
 ---
 
-Migrated task management from markdown files to Linear via MCP. Two systems, clear roles: Linear holds what to do and when. The vault holds why and what happened. Five slash commands bridge the two. Tasks in a real tool, context in owned files.
+Moved task management into Linear, a real project management tool. Two systems, clear roles: Linear holds what to do and when. My notes hold why and what happened. Tasks in a purpose-built tool, context in files I own.

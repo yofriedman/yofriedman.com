@@ -1,6 +1,6 @@
 ---
 date: 2026-02-01
-tags: [building, throughline]
+tags: [building]
 ---
 
-Installed Firecrawl for scraping web pages to clean markdown. Any URL becomes a searchable document in the vault with one command. The gap between "I read something interesting" and "it's in my system" is now about five seconds.
+Installed a web clipper that converts any URL to a clean, searchable document in my notes. The gap between "I read something interesting" and "it's in my system" is now about five seconds.

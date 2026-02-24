@@ -1,6 +1,6 @@
 ---
 date: 2026-01-10
-tags: [building, throughline]
+tags: [building]
 ---
 
-Restructured how meeting notes work. The daily file became an index with brief summaries and links, not a repository. Detailed notes route by type: recurring meetings get their own files, project meetings go to project files. The system scales now because `_Daily.md` stays lean and context lives where it's useful.
+Restructured how meeting notes work. The daily log became an index — brief summaries with links to longer notes — not a dumping ground. Recurring meetings, project meetings, and one-offs each route to their own place. The system scales now because the daily file stays lean and context lives where it's useful.
